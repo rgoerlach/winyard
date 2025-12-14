@@ -12,24 +12,40 @@ header('Content-Type: application/json');
 $service_version = "1.0.0";
 $api_name = "Basic Utility API";
 
+// Wir extrahieren den Teil nach dem Skriptnamen (api.php)
+$request_uri = $_SERVER['REQUEST_URI'];
+$script_name = $_SERVER['SCRIPT_NAME'];
+
 // 3. **Pfad-Analyse (Routing)**
 // Wir nutzen REQUEST_URI, um den angefragten Pfad zu bestimmen.
 // Beispiel: Wenn die URL http://deinserver/api.php/isAlive ist,
 // dann ist $path_info '/api.php/isAlive' (oder nur '/isAlive' je nach Serverkonfiguration).
 
-// Wir extrahieren den Teil nach dem Skriptnamen (api.php)
-$request_uri = $_SERVER['REQUEST_URI'];
-$script_name = $_SERVER['SCRIPT_NAME'];
+$path_info = '';
 
-// Entferne den Skriptnamen und mögliche Query-Strings
-$path = str_replace($script_name, '', $request_uri);
-$path_parts = array_values(array_filter(explode('/', $path))); // Splitte nach '/' und entferne leere Einträge
+// Prüfen, ob der Server PATH_INFO korrekt gesetzt hat (häufig bei Mod_Rewrite der Fall)
+if (isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO'] !== '/') {
+    $path_info = $_SERVER['PATH_INFO'];
+} 
+// Alternativ, falls PATH_INFO leer ist, analysieren wir die REQUEST_URI (Fallback)
+else {
+    $request_uri = $_SERVER['REQUEST_URI'];
+    // Entfernen des Basispfads (/api) und möglichen Query-Strings
+    // Passe '/api' an, falls du einen anderen Pfad in .htaccess gewählt hast
+    $path_info = str_replace('/api', '', $request_uri); 
+    $path_info = strtok($path_info, '?');
+}
+
+// Bereinigen und Splitten des Pfades
+$path_parts = array_values(array_filter(explode('/', $path_info))); 
+
+// Der erste Teil sollte unser Endpunkt sein (z.B. 'isAlive')
+$endpoint = isset($path_parts[0]) ? $path_parts[0] : '';
 
 // Der erste Teil sollte unser Endpunkt sein (z.B. 'isAlive')
 $endpoint = isset($path_parts[0]) ? $path_parts[0] : '';
 
 // 4. **Funktions-Implementierung (Dispatcher)**
-
 switch ($endpoint) {
     case 'isAlive':
         // **Funktion 1: isAlive** - Überprüft, ob der Service läuft
