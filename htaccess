@@ -1,0 +1,20 @@
+# Aktiviere das Rewrite-Modul
+RewriteEngine On
+
+# Optional: Setze eine Basis-URL, falls die API in einem Unterordner liegt (z.B. /meinprojekt/api)
+# RewriteBase /
+
+# 1. Überspringe, wenn die angefragte Datei oder das Verzeichnis existiert (z.B. Bilder, CSS)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# 2. Leite alle anderen Anfragen (z.B. /api/isAlive) intern an api.php weiter
+# Die gesamte angefragte URI wird dabei als Query-Parameter 'path' übergeben,
+# oder direkt in $_SERVER['PATH_INFO'] gespeichert, je nach Serverkonfiguration.
+RewriteRule ^api/(.*)$ api.php/$1 [L] 
+
+# Optional: Wenn du die Endpunkte direkt im Root der API haben möchtest (z.B. /isAlive)
+# dann ändere die RewriteRule zu:
+# RewriteRule ^(.*)$ api.php/$1 [L]
+
+
